@@ -12,13 +12,13 @@ import (
 type RepoInterface interface {
 
 	//no se cual si va y cual no
-	LoadProducts(path string)
+	//LoadProducts(path string) []domain.Product
 	//ValidateEmptys(product *domain.Product) (bool, error)
 	//ValidateExpiration(product *domain.Product) (bool, error)
 	ValidateCodeValue(codeValue string) bool
-	GetAllProducts() []domain.Product
+	GetAllProducts() ([]domain.Product, error)
 	GetProduct(id int) (pr domain.Product, err error)
-	SearchProduct(priceGt float64) []domain.Product
+	SearchProduct(priceGt float64) ([]domain.Product, error)
 	PostProduct(product domain.Product) (err error)
 }
 
@@ -33,15 +33,16 @@ func NewRepository(db *[]domain.Product, lastID int) RepoInterface {
 	return &repoStruct{db: db, lastID: lastID}
 }
 
-func (r *repoStruct) LoadProducts(path string) { //(, list *[]domain.Product)
+func LoadProducts(path string) (list *[]domain.Product) { //(, list *[]domain.Product)
 	file, err := os.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}
-	err = json.Unmarshal([]byte(file), &r.db) //&list
+	err = json.Unmarshal([]byte(file), &list) //&list
 	if err != nil {
 		panic(err)
 	}
+	return list
 }
 
 // validateEmptys valida que los campos no esten vacios
@@ -99,8 +100,8 @@ func (r *repoStruct) ValidateCodeValue(codeValue string) bool {
 }
 
 // GetAllProducts traer todos los productos almacenados
-func (r *repoStruct) GetAllProducts() []domain.Product {
-	return *r.db
+func (r *repoStruct) GetAllProducts() ([]domain.Product, error) {
+	return *r.db, nil
 	/* func(ctx *gin.Context) {
 		ctx.JSON(200, productsList)
 	}*/
@@ -124,12 +125,12 @@ func (r *repoStruct) GetProduct(id int) (pr domain.Product, err error) {
 		}
 	}
 	//ctx.JSON(404, gin.H{"error": "product not found"})
-	return domain.Product{}, errors.New("No se encontró id del product")
+	return domain.Product{}, err
 
 }
 
 // SearchProduct traer un producto por nombre o categoria
-func (r *repoStruct) SearchProduct(priceGt float64) []domain.Product {
+func (r *repoStruct) SearchProduct(priceGt float64) ([]domain.Product, error) {
 
 	/*gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -145,7 +146,7 @@ func (r *repoStruct) SearchProduct(priceGt float64) []domain.Product {
 			list = append(list, product)
 		}
 	}
-	return list
+	return list, nil
 }
 
 // PostProduct crear un producto
@@ -163,17 +164,17 @@ func (r *repoStruct) PostProduct(product domain.Product) (err error) {
 	valid, err := ValidateEmptys(&product)
 	if !valid {
 		// ctx.JSON(400, gin.H{"error": err.Error()})
-		return errors.New("error desconocido")
+		return err //("error a validar vacios")
 	}
 	valid, err = ValidateExpiration(&product)
 	if !valid {
 		//ctx.JSON(400, gin.H{"error": err.Error()})
-		return errors.New("error desconocido")
+		return err //ors.New("error a validar expiración")
 	}
 	valid = r.ValidateCodeValue(product.CodeValue)
 	if !valid {
 		//ctx.JSON(400, gin.H{"error": "code value already exists"})
-		return errors.New("error desconocido")
+		return errors.New("error a validar codigo repetido")
 	}
 	product.Id = len(*r.db) + 1
 	*r.db = append(*r.db, product)
