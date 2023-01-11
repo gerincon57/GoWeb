@@ -3,26 +3,39 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
+type Product struct {
+	Id          int
+	Name        string
+	Quantity    int
+	CodeValue   string
+	IsPublished bool
+	Expiration  string
+	Price       float64
+}
+
+var productsList = []Product{}
+
 func main() {
-	leerJson()
+	leerJson(&productsList)
 
 }
 
-func leerJson() {
-	data, err := ioutil.ReadFile("../products.json")
+func leerJson(slice *[]Product) {
+	data, err := os.ReadFile("../products.json")
 	if err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
+
+	}
+	//fmt.Print("data:  ", string(data))
+
+	err = json.Unmarshal([]byte(data), &slice)
+	if err != nil {
+		fmt.Println("cocurrio error:", err)
+		panic(err)
 	}
 	fmt.Print("data:  ", string(data))
-	var slice []string
-	err = json.Unmarshal(data, &slice)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Printf("slice: %q\n", slice)
+
 }

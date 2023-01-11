@@ -34,7 +34,7 @@ func main() {
 	products := router.Group("/products")
 	{
 		products.GET("", GetAllProducts())
-		products.GET(":id", GetProductID())
+		products.GET(":id", GetProductID()) //localhost:8080/products/5
 		products.GET("/search", SearchProduct())
 		products.POST("", CreateProduct())
 	}
