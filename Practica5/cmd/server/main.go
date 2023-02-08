@@ -6,8 +6,23 @@ import (
 	"github.com/bootcamp-go/Consignas-Go-Web.git/pkg/storage"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+
+	//"github.com/swaggo/gin-swagger" // gin-swagger middleware
+	// swagger embed files
+	docs "github.com/practica5/cmd/server/docs"
 )
 
+// @BasePath /poducts
+
+// PingExample godoc
+// @Summary ping example
+// @Schemes
+// @Description do ping
+// @Tags example
+// @Accept json
+// @Produce json
+// @Success 200 {string} Helloworld
+// @Router /products [get]
 func main() {
 
 	//importacion variable global:
@@ -26,6 +41,10 @@ func main() {
 	productHandler := handler.NewProductHandler(service)
 
 	r := gin.Default()
+	docs.SwaggerInfo.BasePath = "/products"
+
+	//r := gin.New()
+	//r.Use(gin.Recovery())
 
 	r.Use(handler.MiddlewareToken())
 
