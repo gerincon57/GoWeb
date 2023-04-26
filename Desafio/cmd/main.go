@@ -20,7 +20,7 @@ func main() {
 	// Cargo csv.
 	list, err := LoadTicketsFromFile("../../tickets.csv")
 	if err != nil {
-		panic("Couldn't load tickets")
+		panic("Couldn't load tickets try ")
 	}
 
 	r := gin.Default()
